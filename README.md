@@ -1,0 +1,2 @@
+# MODELO-DE-PRONOSTICO-DE-VENTAS-DE-ROSAS-EN-ESTADOS-UNIDOS-MEDIANTE-SERIES-DE-TIEMPO
+Este proyecto desarrolla un modelo analítico para el pronóstico de la demanda de rosas ecuatorianas en el mercado de EE.UU., utilizando la metodología de series de tiempo SARIMAX. El caso de negocio corresponde a una comercializadora de flores ubicada en Miami como centro logístico. El problema central es la alta estacionalidad de la demanda.
