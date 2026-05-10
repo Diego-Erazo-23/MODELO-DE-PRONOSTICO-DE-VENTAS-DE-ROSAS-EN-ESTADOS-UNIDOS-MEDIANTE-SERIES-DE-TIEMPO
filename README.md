@@ -37,40 +37,15 @@ El modelo M3 logra una reducción de **6.75 puntos porcentuales** respecto al be
 
 ---
 
-## Estructura del Repositorio
-
-```
-sarimax-rosas-eeuu/
-│
-├── README.md                          ← Este archivo
-├── Modelo_SARIMAX_DEFINITIVO.ipynb    ← Notebook principal con todo el análisis
-│
-├── data/
-│   └── README_datos.md                ← Explicación sobre la confidencialidad de los datos
-│
-└── outputs/
-    ├── figura1_estacionalidad.png
-    ├── figura2_serie_anual.png
-    ├── figura3_costo_logistico.png
-    ├── figura4_correlacion.png
-    ├── figura5_acf_pacf.png
-    ├── figura6_pronostico_vs_real.png
-    ├── figura7_comparacion_mape.png
-    ├── figura8_distribucion_errores.png
-    └── figura9_coeficientes_m3.png
-```
-
----
-
 ## Sobre los Datos
 
-> ⚠️ **Los datos originales no están disponibles en este repositorio por razones de confidencialidad empresarial.**
+> **Los datos originales no están disponibles en este repositorio por razones de confidencialidad empresarial.**
 
 ### ¿Por qué no se publican los datos?
 
-Las bases de datos utilizadas en este proyecto provienen de los **registros operativos internos de Naranjo Farms LLC**, una empresa privada ecuatoriana dedicada a la exportación y comercialización de rosas cortadas en el mercado de EE.UU.
+Las bases de datos utilizadas en este proyecto provienen de los **registros operativos internos de la comercializadora**, una empresa privada ecuatoriana dedicada a la exportación y comercialización de flores cortadas en el mercado de EE.UU.
 
-La base de datos principal contiene **143.682 transacciones individuales** con información detallada a nivel de factura, incluyendo: clientes, volúmenes por variedad, precios de venta, rutas logísticas y costos de flete. La base exógena contiene información semanal de **costos logísticos internos** (flete aéreo Quito–Miami y handling).
+La base de datos principal contiene **143.682 transacciones individuales** con información detallada a nivel de factura. La base exógena contiene información semanal de **costos logísticos internos** (flete aéreo Quito–Miami y handling).
 
 Publicar estos datos implicaría:
 
@@ -83,7 +58,7 @@ Publicar estos datos implicaría:
 
 Para replicar el notebook con datos propios, necesitarás construir **dos archivos CSV** con la siguiente estructura:
 
-#### Archivo 1: `historico_ventas_2021-2026.csv`
+#### Archivo 1: `historico_ventas.csv`
 
 Debe contener al menos las siguientes columnas (los nombres deben coincidir exactamente):
 
@@ -115,7 +90,7 @@ Debe contener exactamente 7 columnas en este orden:
 
 ## Descripción del Notebook
 
-El notebook `Modelo_SARIMAX_DEFINITIVO.ipynb` está organizado en **23 secciones numeradas**, más las celdas de figuras. A continuación se describe qué hace cada bloque:
+El notebook `Modelo_SARIMAX.ipynb` está organizado en **23 secciones numeradas**, más las celdas de figuras. A continuación se describe qué hace cada bloque:
 
 ### Bloque 0 — Librerías
 Importa todas las dependencias necesarias: `numpy`, `pandas`, `matplotlib`, `seaborn`, `statsmodels` (SARIMAX, ADF, ACF/PACF, Ljung-Box) y `sklearn` (RMSE).
@@ -137,13 +112,13 @@ Calcula el índice de demanda relativa para cada semana del año (valor real / p
 
 ### Figuras 1–4 — Análisis exploratorio visual
 
-- **Figura 1 (Bloque entre 5 y 8b):** Matriz de correlación entre tallos semanales, costo logístico y temporada. Muestra r=0.63 entre tallos y festividad, r=0.38 entre tallos y costo logístico.
+- **Figura 1 (Bloque entre 5 y 8b):** Matriz de correlación entre tallos semanales, costo logístico y temporada.
 - **Figura 2:** Índice de estacionalidad semanal con barras coloreadas por festividad.
 - **Figura 3:** Serie temporal anual 2021–2026, una línea por año, mostrando la repetibilidad del patrón estacional.
-- **Figura 4:** Evolución del costo logístico total por kg con marcas de semanas festivas y la media histórica (2.397 USD/kg).
+- **Figura 4:** Evolución del costo logístico total por kg con marcas de semanas festivas y la media histórica.
 
 ### Bloque 8b — Identificación y descripción formal de variables
-Documenta todas las variables del modelo (tipo, descripción, índices históricos). Equivalente a la Tabla 5 del documento escrito.
+Documenta todas las variables del modelo (tipo, descripción, índices históricos).
 
 ### Bloque 9 — Preparación final para el modelo
 Construye el índice de fechas en formato `DatetimeIndex` con frecuencia semanal (`W-MON`) necesario para que `statsmodels` procese correctamente la serie temporal.
@@ -154,26 +129,27 @@ Aplica el test de Dickey-Fuller Aumentado. Resultado: serie original p=0.098 (no
 ### Figura 5 — ACF y PACF (Bloque después de 10)
 Panel 2×2 con ACF y PACF de la serie original y su primera diferencia. El pico de ACF en rezago 52 (+0.536) confirma s=52. El PACF en rezago 52 (+0.155 > banda ±0.120) fija P=1 y Q=1.
 
-### Bloque 11 — Justificación empírica de D=0
+### Bloque 11 — Justificación de D=0
 Compara AIC con D=0 (4112.8) vs D=1 (9835.8). La diferencia de +5723 puntos y la pérdida de 52 observaciones adicionales justifican D=0.
 
-### Bloques intermedios — Auto-ARIMA y construcción de variables dummy
+### Bloques intermedios 13 al 16 — Auto-ARIMA y construcción de variables dummy
 Ejecuta Auto-ARIMA para seleccionar los órdenes p y q óptimos por modelo. Construye las 5 variables dummy individuales (V_PRE, V_PEAK, M_PRE, M_PEAK, M_POST) y la variable LOG_c (costo logístico centrado en su media). Define los conjuntos de entrenamiento (217 semanas) y prueba (52 semanas).
 
-### Bloque de diagnóstico de LOG_c
+### Bloque 17- Diagnóstico de LOG_c
 Analiza la colinealidad de la variable de costo logístico: correlación total r=+0.38 vs correlación en semanas normales r=+0.11. Compara MAPE con y sin LOG_c para justificar su retención.
 
 ### Bloque 18 — Modelo M1 (SARIMA benchmark)
 Ajusta SARIMA(3,1,3)(1,0,1)₅₂ sin variables exógenas. Genera pronósticos para las 52 semanas de prueba. Calcula MAPE, RMSE, MAE y verifica ruido blanco con Ljung-Box.
 
 ### Bloque 19 — Modelo M2 (SARIMAX con FES ordinal)
-Ajusta SARIMAX(3,1,3)(1,0,1)₅₂ con la variable ordinal de festividades, replicando la metodología de Falatouri et al. (2022). Resultado: MAPE=24.81%, **peor que M1**, confirmando que codificar igual semanas con índices muy distintos introduce sesgo sistemático.
+Ajusta SARIMAX(3,1,3)(1,0,1)₅₂ con la variable ordinal de festividades.
+Calcula MAPE, RMSE, MAE y verifica ruido blanco con Ljung-Box.
 
 ### Bloque 20 — Modelo M3 (modelo propuesto)
-Ajusta SARIMAX(1,1,3)(1,0,1)₅₂ con las 5 dummies individuales y LOG_c. Imprime todos los coeficientes estimados con sus p-valores y niveles de significancia. **MAPE=16.97%**, reducción de 28.5% respecto al benchmark.
+Ajusta SARIMAX(1,1,3)(1,0,1)₅₂ con las 5 dummies individuales y LOG_c. Imprime todos los coeficientes estimados con sus p-valores y niveles de significancia.
 
 ### Bloque 21 — Tabla comparativa y MAPE segmentado
-Resume los tres modelos en una tabla. Calcula el MAPE por segmento: semanas normales (13.95%), Día de la Madre (52.06%, dominado por la semana 19), San Valentín (27.15%, dominado por el pico histórico de Feb 2026). Cobertura APE<25%: 78.4% de las semanas.
+Resume los tres modelos en una tabla. Calcula el MAPE por segmento: semanas normales, Día de la Madre, San Valentín. Cobertura APE<25%: 78.4% de las semanas.
 
 ### Bloque 22 — Horizonte de pronóstico de 12 semanas
 Evalúa el MAPE a diferentes horizontes de pronóstico (1, 4, 8, 12 semanas). Verifica que el error se mantiene aceptable en las 12 semanas necesarias para el ciclo logístico completo Quito–Miami.
@@ -194,70 +170,15 @@ Imprime un resumen completo con métricas, validación estadística, mejora vs b
 
 ### Opción A: Google Colab (recomendado)
 
-1. Sube el notebook `Modelo_SARIMAX_DEFINITIVO.ipynb` a Google Colab.
-2. Sube ambos archivos CSV a Google Drive en la siguiente ruta:
-   ```
-   Mi unidad/CLASES MAESTRIA/Proyecto MBD/
-   ```
+1. Sube el notebook `Modelo_SARIMAX.ipynb` a Google Colab.
+2. Sube ambos archivos CSV a Google Drive:
+   
    Con los nombres exactos:
-   - `historico_ventas_2021-2026.csv`
+   - `historico_ventas.csv`
    - `Variables_exogenas.csv`
-3. Ejecuta el notebook de arriba a abajo con `Runtime > Run all`.
+3. Ejecuta el notebook  `Runtime > Run all`.
 4. En el **Bloque 1**, si el entorno no tiene Arial, se usará DejaVu Sans automáticamente.
 5. Los archivos PNG de las figuras se guardarán en el directorio de trabajo de Colab.
-
-> **Nota:** El Bloque 1 instala la fuente Arial con `apt-get`. Esto puede tomar 30–60 segundos la primera vez.
-
-### Opción B: Jupyter local (Anaconda / venv)
-
-1. Instala las dependencias (ver sección siguiente).
-2. Clona o descarga este repositorio.
-3. Coloca ambos archivos CSV en la misma carpeta que el notebook.
-4. Modifica las rutas de carga en los **Bloques 2 y 4**:
-   ```python
-   # Bloque 2 — reemplaza esto:
-   file_path = "/content/drive/My Drive/CLASES MAESTRIA/Proyecto MBD/historico_ventas_2021-2026.csv"
-   # por esto:
-   file_path = "historico_ventas_2021-2026.csv"
-
-   # Bloque 4 — reemplaza esto:
-   exog_path = "/content/drive/My Drive/CLASES MAESTRIA/Proyecto MBD/Variables_exogenas.csv"
-   # por esto:
-   exog_path = "Variables_exogenas.csv"
-   ```
-5. **Comenta o elimina** las líneas de montaje de Google Drive en el Bloque 0:
-   ```python
-   # from google.colab import drive        ← comentar esta línea
-   # drive.mount('/content/drive')         ← comentar esta línea
-   ```
-6. **Comenta o elimina** el bloque de instalación de fuentes en el Bloque 1 (el bloque `subprocess.run`). La fuente Arial no estará disponible localmente a menos que la tengas instalada; el código la reemplaza automáticamente por DejaVu Sans.
-7. Ejecuta el notebook celda por celda con `Shift+Enter` o completo con `Kernel > Restart & Run All`.
-
-### Tiempos de ejecución esperados
-
-| Bloque | Tiempo estimado |
-|--------|-----------------|
-| Carga y preprocesamiento (bloques 0–9) | < 1 minuto |
-| Prueba ADF + ACF/PACF (bloques 10–11) | < 30 segundos |
-| Auto-ARIMA (bloque de selección de parámetros) | 2–5 minutos |
-| Ajuste M1 (bloque 18) | 30–60 segundos |
-| Ajuste M2 (bloque 19) | 30–60 segundos |
-| Ajuste M3 (bloque 20) | 30–60 segundos |
-| Figuras y resumen final | < 1 minuto |
-| **Total** | **~8–12 minutos** |
-
----
-
-## Dependencias
-
-```txt
-numpy>=1.23
-pandas>=1.5
-matplotlib>=3.6
-seaborn>=0.12
-statsmodels>=0.13
-scikit-learn>=1.1
-```
 
 ### Instalación
 
@@ -289,16 +210,16 @@ conda install numpy pandas matplotlib seaborn statsmodels scikit-learn
 
 ### Coeficientes del modelo M3 — SARIMAX(1,1,3)(1,0,1)₅₂
 
-| Variable | Coeficiente estimado | p-valor | Significancia |
-|----------|---------------------|---------|---------------|
-| V_PEAK (sem. 5–6) | +255.000 tallos | < 0.001 | *** |
-| M_PEAK (sem. 18) | +151.000 tallos | < 0.001 | *** |
-| M_PRE (sem. 17) | +125.000 tallos | < 0.001 | *** |
-| M_POST (sem. 19) | +70.000 tallos | < 0.05 | * |
-| V_PRE (sem. 4) | ~0 | n.s. | — |
-| LOG_c | +35.165 tallos/USD·kg⁻¹ | 0.115 | n.s.* |
+| Variable | Coeficiente estimado | p-valor |
+|----------|---------------------|---------|
+| V_PEAK (sem. 5–6) | +255.000 tallos | < 0.001 |
+| M_PEAK (sem. 18) | +151.000 tallos | < 0.001 |
+| M_PRE (sem. 17) | +125.000 tallos | < 0.001 |
+| M_POST (sem. 19) | +70.000 tallos | < 0.05 |
+| V_PRE (sem. 4) | ~0 | n.s. |
+| LOG_c | +35.165 tallos/USD·kg⁻¹ | 0.115 |
 
-> \* LOG_c no alcanza significancia estadística convencional (p=0.115), pero su retención mejora el MAPE en 1.75 puntos porcentuales fuera de muestra (Hyndman & Athanasopoulos, 2021).
+> \* LOG_c no alcanza significancia estadística convencional (p=0.115), pero su retención mejora el MAPE en 1.75 puntos porcentuales fuera de muestra 
 
 ### Validación estadística
 
