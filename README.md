@@ -23,7 +23,7 @@
 
 Este proyecto desarrolla un modelo analítico para el **pronóstico de la demanda de rosas ecuatorianas en el mercado de EE.UU**, utilizando la metodología de series de tiempo **SARIMAX**.
 
-El caso de negocio corresponde a una comercializadora de flores ubicada en Miami como centro logístico. El problema central es la **alta estacionalidad de la demanda**, con picos pronunciados en San Valentín (semanas 4–6) y Día de la Madre (semanas 17–19), y caidas de las ventas en verano. Dado que las rosas son un producto perecedero, subestimar la demanda genera quiebres de stock en temporada pico, y sobreestimarla genera inventario dañado y costos de destrucción.
+El caso de negocio corresponde a una comercializadora de flores ubicada en Miami como centro logístico. El problema central es la **alta estacionalidad de la demanda**, con picos pronunciados en San Valentín (semanas 4–6) y Día de la Madre (semanas 17–19), y caídas de las ventas en verano. Dado que las rosas son un producto perecedero, subestimar la demanda genera quiebres de stock en temporada pico, y sobreestimarla genera inventario dañado y costos de destrucción.
 
 El proyecto compara tres modelos:
 
