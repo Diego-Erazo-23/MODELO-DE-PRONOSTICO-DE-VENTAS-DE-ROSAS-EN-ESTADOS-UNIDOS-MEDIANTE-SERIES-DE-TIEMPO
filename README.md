@@ -33,7 +33,7 @@ El proyecto compara tres modelos:
 | **M2** | SARIMAX(3,1,3)(1,0,1)₅₂ | 24.81% | SARIMAX con variable ordinal de festividades (replica Falatouri et al., 2022) |
 | **M3** | SARIMAX(1,1,3)(1,0,1)₅₂ | **16.97%** | **Modelo propuesto**: 5 dummies individuales + costo logístico |
 
-El modelo M3 logra una reducción de **6.75 puntos porcentuales** respecto al benchmark (28.5% de mejora relativa), cumpliendo el objetivo establecido de MAPE < 25%.
+El modelo M3 logra una reducción de **6.75 puntos porcentuales** respecto al benchmark (28.5% de mejora relativa).
 
 ---
 
